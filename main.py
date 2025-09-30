@@ -4,10 +4,12 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.styles import Alignment
 import os
+import sys
+import argparse
 
-def process_sarif(file_path):
+def process_sarif(input_file_path):
     # Load SARIF file with utf-8 encoding
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(input_file_path, 'r', encoding='utf-8') as file:
         sarif = json.load(file)
 
     # Extract the results section
@@ -30,8 +32,13 @@ def process_sarif(file_path):
     # Convert to DataFrame
     df = pd.DataFrame(rows, columns=["Severity", "Message", "Details", "Path", "Page", "Line"])
     
+    # Generate output file path in same directory as input, with .xlsx extension
+    input_dir = os.path.dirname(input_file_path)
+    input_filename = os.path.basename(input_file_path)
+    output_filename = os.path.splitext(input_filename)[0] + '.xlsx'
+    output_file = os.path.join(input_dir, output_filename)
+    
     # Save to Excel
-    output_file = "sarif_report.xlsx"
     df.to_excel(output_file, index=False, sheet_name="Results")
 
     # Add table formatting and adjust column widths
@@ -87,5 +94,17 @@ def add_excel_table_and_adjust_columns(file_path, sheet_name, wrap_columns, auto
     wb.save(file_path)
     print(f"Table formatting and column adjustments added to {file_path}")
 
-# Example Usage
-process_sarif('qodana.sarif.json')
+def main():
+    parser = argparse.ArgumentParser(description='Convert SARIF reports to Excel format')
+    parser.add_argument('sarif_file', help='Path to the SARIF file to process')
+    
+    args = parser.parse_args()
+    
+    if not os.path.exists(args.sarif_file):
+        print(f"Error: File '{args.sarif_file}' not found.")
+        sys.exit(1)
+    
+    process_sarif(args.sarif_file)
+
+if __name__ == '__main__':
+    main()
