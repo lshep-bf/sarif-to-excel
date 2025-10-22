@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 import os
 import sys
 import argparse
@@ -50,27 +50,59 @@ def add_excel_table_and_adjust_columns(file_path, sheet_name, wrap_columns, auto
     # Load the workbook and worksheet
     wb = load_workbook(file_path)
     ws = wb[sheet_name]
-    
+
     # Determine the range of the table (e.g., A1:F20)
     start_cell = ws.cell(row=1, column=1)
     end_cell = ws.cell(row=ws.max_row, column=ws.max_column)
     table_range = f"{start_cell.coordinate}:{end_cell.coordinate}"
-    
-    # Create a table
+
+    # Create a table with filters but no banded rows
     table = Table(displayName="SARIFTable", ref=table_range)
-    
-    # Add a table style (banded rows but no banded columns)
+
+    # Add a table style without banded rows
     style = TableStyleInfo(
-        name="TableStyleMedium9",  # Choose a predefined Excel table style
+        name="TableStyleLight1",  # Use a plain style
         showFirstColumn=False,
         showLastColumn=False,
-        showRowStripes=True,  # Enable banded rows
+        showRowStripes=False,  # Disable banded rows
         showColumnStripes=False  # Disable banded columns
     )
     table.tableStyleInfo = style
-    
-    # Add the table to the worksheet
+
+    # Add the table to the worksheet (this enables filters)
     ws.add_table(table)
+
+    # Define styling elements
+    thin_border = Border(
+        left=Side(style='thin', color='000000'),
+        right=Side(style='thin', color='000000'),
+        top=Side(style='thin', color='000000'),
+        bottom=Side(style='thin', color='000000')
+    )
+
+    header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+    header_fill = PatternFill(start_color='595959', end_color='595959', fill_type='solid')  # Dark grey (approximately 22% grey)
+
+    data_font = Font(name='Calibri', size=11, bold=False, color='000000')
+    data_fill = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')  # White background
+
+    # Apply styling to all populated cells
+    for row_idx in range(1, ws.max_row + 1):
+        for col_idx in range(1, ws.max_column + 1):
+            cell = ws.cell(row=row_idx, column=col_idx)
+
+            # Apply borders to all cells
+            cell.border = thin_border
+
+            # Apply font to all cells
+            if row_idx == 1:
+                # Header row styling
+                cell.font = header_font
+                cell.fill = header_fill
+            else:
+                # Data row styling
+                cell.font = data_font
+                cell.fill = data_fill
 
     # Adjust column widths and wrap text
     for col_name in ws[1]:
@@ -89,7 +121,7 @@ def add_excel_table_and_adjust_columns(file_path, sheet_name, wrap_columns, auto
             for row in range(2, ws.max_row + 1):
                 cell = ws.cell(row=row, column=col_index)
                 cell.alignment = Alignment(wrap_text=True)  # Enable text wrapping
-    
+
     # Save the workbook
     wb.save(file_path)
     print(f"Table formatting and column adjustments added to {file_path}")
