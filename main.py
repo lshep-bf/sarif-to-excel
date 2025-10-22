@@ -20,10 +20,15 @@ def process_sarif(input_file_path):
     for result in results:
         file_path = result.get('locations', [{}])[0].get('physicalLocation', {}).get('artifactLocation', {}).get('uri', 'N/A')
         file_name = os.path.basename(file_path)  # Extract the file name from the path
+
+        # Get the details text and replace Aquasec URLs with NIST URLs
+        details_text = result.get('message', {}).get('text', 'N/A')
+        details_text = details_text.replace('avd.aquasec.com/nvd/', 'nvd.nist.gov/vuln/detail/')
+
         rows.append({
             "Severity": result.get('level', 'N/A'),
             "Message": result.get('ruleId', 'N/A'),  # Renamed from Rule ID
-            "Details": result.get('message', {}).get('text', 'N/A'),  # Renamed from Message
+            "Details": details_text,  # Renamed from Message
             "Path": file_path,  # Renamed from File
             "Page": file_name,  # Use the file name as the page value
             "Line": result.get('locations', [{}])[0].get('physicalLocation', {}).get('region', {}).get('startLine', 'N/A')
