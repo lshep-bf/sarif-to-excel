@@ -15,6 +15,13 @@ def process_sarif(input_file_path):
     # Extract the results section
     results = sarif.get('runs', [])[0].get('results', [])
     
+    # Severity mapping from SARIF levels to normalized levels
+    severity_mapping = {
+        'note': 'Low',
+        'warning': 'Medium',
+        'error': 'High'
+    }
+
     # Process results into a DataFrame
     rows = []
     for result in results:
@@ -25,8 +32,12 @@ def process_sarif(input_file_path):
         details_text = result.get('message', {}).get('text', 'N/A')
         details_text = details_text.replace('avd.aquasec.com/nvd/', 'nvd.nist.gov/vuln/detail/')
 
+        # Normalize severity level
+        raw_severity = result.get('level', 'N/A')
+        normalized_severity = severity_mapping.get(raw_severity, raw_severity)
+
         rows.append({
-            "Severity": result.get('level', 'N/A'),
+            "Severity": normalized_severity,
             "Message": result.get('ruleId', 'N/A'),  # Renamed from Rule ID
             "Details": details_text,  # Renamed from Message
             "Path": file_path,  # Renamed from File
