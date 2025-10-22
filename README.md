@@ -1,39 +1,39 @@
 # SARIF to Excel Formatter
 
-**SARIF to Excel Formatter** is a Python-based tool designed to transform SARIF (Static Analysis Results Interchange Format) reports into clean, readable, and professionally formatted Excel files. This tool simplifies the analysis of static code analysis results, making it easier to interpret, share, and report findings.
+A Python tool that converts SARIF (Static Analysis Results Interchange Format) reports into professionally formatted Excel spreadsheets with clickable hyperlinks, custom styling, and organized data.
+
+**Note that this fork of the tool is meant to solve specific problems encountered with SARIF files that are create with the (excellent) `trivy`  command line tool. But it should still work with SARIF files created by other tools.**
 
 ---
 
 ## Features
 
-- **Dynamic Column Resizing**:
-  Automatically adjusts column widths based on the largest content for improved readability.
+- **Professional Excel Formatting**:
+  - Clean table layout with thin black borders
+  - Dark grey header row with white bold text
+  - Filter dropdowns on all columns
 
-- **Text Wrapping for Large Fields**:
-  Ensures fields like `Message` and `Details` are legible by wrapping text and setting optimal column widths.
+- **Smart Data Processing**:
+  - Normalizes severity levels (`note` → `Low`, `warning` → `Medium`, `error` → `High`)
+  - Converts Aquasec URLs to NIST URLs automatically
+  - Creates clickable hyperlinks from Markdown-formatted links
 
-- **Customizable Columns**:
-  Allows you to include specific fields like `Severity`, `Path`, `Page`, `Line`, and more, with a user-friendly layout.
+- **Dynamic Column Sizing**:
+  - Auto-fits columns for `Path`, `Page`, and `Line`
+  - Text wrapping for `Message` and `Details` columns
 
-- **Tool-Agnostic Compatibility**:
-  Works with any tool that outputs SARIF reports, including:
-  - Qodana
-  - CodeQL
-  - SonarQube
-  - ESLint
-  - GitHub Code Scanning
+- **Sheet Naming**:
+  - Names Excel sheets after the input SARIF filename for easy organization
 
-- **Excel Table Formatting**:
-  Outputs professional-grade Excel files with built-in table formatting for filtering and sorting.
+- **Tool Compatibility**:
+  Works with any SARIF-compliant tool (Trivy, Qodana, CodeQL, SonarQube, ESLint, GitHub Code Scanning)
 
 ---
 
 ## Requirements
 
-Ensure the following dependencies are installed:
-
 - Python 3.6+
-- Required Python libraries:
+- Dependencies:
   ```bash
   pip install pandas openpyxl
   ```
@@ -42,71 +42,45 @@ Ensure the following dependencies are installed:
 
 ## Installation
 
-1. Clone this repository:
+1. Clone this repository. Note that this is a fork of the original repo created by [barkerbg001](https://github.com/barkerbg001):
    ```bash
-   git clone https://github.com/barkerbg001/sarif-to-excel.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
+   git clone https://github.com/lshep-bf/sarif-to-excel.git
    cd sarif-to-excel
    ```
 
-3. Install the dependencies:
+2. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   pip install pandas openpyxl
    ```
 
 ---
 
 ## Usage
 
-### Basic Command:
-Run the script with your SARIF file:
+Run the tool with a SARIF file path as argument:
 
 ```bash
-python main.py
+python main.py path/to/your-report.sarif
 ```
 
-### Input:
-- Provide the path to your SARIF file (e.g., `qodana.sarif.json`).
-
 ### Output:
-- The formatted Excel file (`sarif_report.xlsx`) will be generated in the project directory.
+- Excel file created in the same directory as the input file
+- Filename matches the input (e.g., `your-report.sarif` → `your-report.xlsx`)
+- Sheet tab named after the input file
+
+### Example:
+```bash
+python main.py ecommerce-api.sarif
+```
+Creates `ecommerce-api.xlsx` with a sheet tab named `ecommerce-api`.
 
 ---
 
-## Example SARIF Report
-Input (SARIF):
-```json
-{
-  "version": "2.1.0",
-  "runs": [
-    {
-      "results": [
-        {
-          "ruleId": "EXAMPLE_RULE",
-          "message": { "text": "This is a test message." },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": { "uri": "src/example.js" },
-                "region": { "startLine": 42 }
-              }
-            }
-          ],
-          "level": "error"
-        }
-      ]
-    }
-  ]
-}
-```
+## Excel Output Structure
 
-Output (Excel):
-| Severity | Message       | Details               | Path           | Page          | Line |
-|----------|---------------|-----------------------|----------------|---------------|------|
-| error    | EXAMPLE_RULE  | This is a test message.| src/example.js | example.js    | 42   |
+| Severity | Message | Details | Path | Page | Line |
+|----------|---------|---------|------|------|------|
+| Low/Medium/High | Rule ID | Description with clickable links | Full file path | Filename | Line number |
 
 ---
 
@@ -147,5 +121,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For questions or suggestions, feel free to reach out:
-- **GitHub**: [barkerbg001](https://github.com/barkerbg001)
+- **Owner of this fork**: [lshep-bf](https://github.com/lshep-bf)
+- **Creator of the original repo**: [barkerbg001](https://github.com/barkerbg001)
 
