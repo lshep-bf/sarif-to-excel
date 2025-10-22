@@ -2,7 +2,7 @@
 
 A Python tool that converts SARIF (Static Analysis Results Interchange Format) reports into professionally formatted Excel spreadsheets with clickable hyperlinks, custom styling, and organized data.
 
-**Note that this fork of the tool is meant to solve specific problems encountered with SARIF files that are create with the (excellent) `trivy`  command line tool. But it should still work with SARIF files created by other tools.**
+**Note that this fork of the tool is meant to solve specific problems encountered with SARIF files that are created with the (excellent) `trivy`  command line tool. But it should still work with SARIF files created by other tools.**
 
 ---
 
