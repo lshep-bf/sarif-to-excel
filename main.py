@@ -6,6 +6,7 @@ from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 import os
 import sys
 import argparse
+import re
 
 def process_sarif(input_file_path):
     # Load SARIF file with utf-8 encoding
@@ -130,7 +131,11 @@ def add_excel_table_and_adjust_columns(file_path, sheet_name, wrap_columns, auto
                 cell.fill = data_fill
 
     # Adjust column widths and wrap text
+    details_col_index = None
     for col_name in ws[1]:
+        if col_name.value == "Details":
+            details_col_index = col_name.column
+
         if col_name.value in auto_fit_columns:
             # Auto-fit column widths based on content length
             col_index = col_name.column
@@ -146,6 +151,33 @@ def add_excel_table_and_adjust_columns(file_path, sheet_name, wrap_columns, auto
             for row in range(2, ws.max_row + 1):
                 cell = ws.cell(row=row, column=col_index)
                 cell.alignment = Alignment(wrap_text=True)  # Enable text wrapping
+
+    # Convert Markdown links to Excel hyperlinks in Details column
+    if details_col_index:
+        # Regex pattern to match Markdown links: [text](url)
+        markdown_link_pattern = r'\[([^\]]+)\]\(([^\)]+)\)'
+
+        for row_idx in range(2, ws.max_row + 1):  # Skip header row
+            cell = ws.cell(row=row_idx, column=details_col_index)
+            cell_value = str(cell.value or "")
+
+            # Check if cell contains a Markdown link
+            match = re.search(markdown_link_pattern, cell_value)
+            if match:
+                link_text = match.group(1)  # The text inside [...]
+                link_url = match.group(2)   # The URL inside (...)
+
+                # Replace the Markdown link with just the link text
+                new_cell_value = re.sub(markdown_link_pattern, link_text, cell_value)
+
+                # Update cell value
+                cell.value = new_cell_value
+
+                # Add hyperlink to the cell
+                cell.hyperlink = link_url
+
+                # Style the hyperlink (blue and underlined)
+                cell.font = Font(name='Calibri', size=11, color='0563C1', underline='single')
 
     # Save the workbook
     wb.save(file_path)
