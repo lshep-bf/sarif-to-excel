@@ -47,18 +47,27 @@ def process_sarif(input_file_path):
     
     # Convert to DataFrame
     df = pd.DataFrame(rows, columns=["Severity", "Message", "Details", "Path", "Page", "Line"])
-    
+
     # Generate output file path in same directory as input, with .xlsx extension
     input_dir = os.path.dirname(input_file_path)
     input_filename = os.path.basename(input_file_path)
-    output_filename = os.path.splitext(input_filename)[0] + '.xlsx'
+    base_name = os.path.splitext(input_filename)[0]
+    output_filename = base_name + '.xlsx'
     output_file = os.path.join(input_dir, output_filename)
-    
+
+    # Sanitize sheet name: remove Excel-disallowed characters and truncate to 31 chars
+    sheet_name = base_name
+    # Remove characters that Excel doesn't allow in sheet names: [ ] : \ / ? *
+    for char in ['[', ']', ':', '\\', '/', '?', '*']:
+        sheet_name = sheet_name.replace(char, '_')
+    # Truncate to Excel's 31 character limit for sheet names
+    sheet_name = sheet_name[:31]
+
     # Save to Excel
-    df.to_excel(output_file, index=False, sheet_name="Results")
+    df.to_excel(output_file, index=False, sheet_name=sheet_name)
 
     # Add table formatting and adjust column widths
-    add_excel_table_and_adjust_columns(output_file, "Results", wrap_columns=["Message", "Details"], auto_fit_columns=["Path", "Page", "Line"])
+    add_excel_table_and_adjust_columns(output_file, sheet_name, wrap_columns=["Message", "Details"], auto_fit_columns=["Path", "Page", "Line"])
     print(f"Processed Report saved to {output_file}")
 
 
