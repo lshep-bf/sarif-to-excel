@@ -1,0 +1,10 @@
+/CLAUDE.md
+/.idea/.gitignore
+/.idea/copilot.data.migration.agent.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/sarif-to-excel.iml
+/memory/tool_inventory_cache.json
+/.idea/vcs.xml
